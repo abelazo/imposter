@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { ImpostorCounter } from './ImpostorCounter'
 import { TopicSelector } from './TopicSelector'
 import type { WordBank } from '../lib/wordBank'
+import { loadGameSettings, saveGameSettings } from '../lib/gameSettings'
 
 interface GameConfig {
   participantCount: number
@@ -20,13 +21,37 @@ function getMaxImpostors(participantCount: number): number {
   return Math.max(1, Math.floor(participantCount / 2) - 1)
 }
 
-export function ParticipantSetup({ onStart, wordBank }: ParticipantSetupProps) {
-  const [participants, setParticipants] = useState<number[]>([])
-  const [nextId, setNextId] = useState(1)
-  const [impostorCount, setImpostorCount] = useState(1)
+function getInitialState(topics: { id: string }[]) {
+  const saved = loadGameSettings()
+  if (saved) {
+    const clampedCount = Math.min(Math.max(0, saved.participantCount), 10)
+    const ids = clampedCount > 0
+      ? Array.from({ length: clampedCount }, (_, i) => i + 1)
+      : []
+    const topicExists = topics.some((t) => t.id === saved.topicId)
+    return {
+      participants: ids,
+      nextId: clampedCount + 1,
+      impostorCount: saved.impostorCount,
+      topicId: topicExists ? saved.topicId : (topics[0]?.id ?? ''),
+    }
+  }
+  return {
+    participants: [] as number[],
+    nextId: 1,
+    impostorCount: 1,
+    topicId: topics[0]?.id ?? '',
+  }
+}
 
+export function ParticipantSetup({ onStart, wordBank }: ParticipantSetupProps) {
   const topics = wordBank.topics
-  const [topicId, setTopicId] = useState(topics[0]?.id ?? '')
+  const [initialState] = useState(() => getInitialState(topics))
+
+  const [participants, setParticipants] = useState<number[]>(initialState.participants)
+  const [nextId, setNextId] = useState(initialState.nextId)
+  const [impostorCount, setImpostorCount] = useState(initialState.impostorCount)
+  const [topicId, setTopicId] = useState(initialState.topicId)
 
   // Compute clamped impostor count based on current participants
   const maxImpostors = getMaxImpostors(participants.length)
@@ -51,11 +76,13 @@ export function ParticipantSetup({ onStart, wordBank }: ParticipantSetupProps) {
   }
 
   const handleStart = () => {
-    onStart({
+    const config = {
       participantCount: participants.length,
       impostorCount: clampedImpostorCount,
       topicId,
-    })
+    }
+    saveGameSettings(config)
+    onStart(config)
   }
 
   const canStart = participants.length >= 3
