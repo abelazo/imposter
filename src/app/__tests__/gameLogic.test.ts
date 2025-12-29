@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { assignRoles, selectWord, type GameState } from '../lib/gameLogic'
+import { assignRoles, type GameState } from '../lib/gameLogic'
 
 describe('gameLogic', () => {
   describe('assignRoles', () => {
@@ -36,23 +36,6 @@ describe('gameLogic', () => {
       }
       // Should have different positions across runs
       expect(results.size).toBeGreaterThan(1)
-    })
-  })
-
-  describe('selectWord', () => {
-    it('returns a non-empty string', () => {
-      const word = selectWord()
-      expect(word).toBeTruthy()
-      expect(typeof word).toBe('string')
-    })
-
-    it('returns different words on multiple calls', () => {
-      const words = new Set<string>()
-      for (let i = 0; i < 20; i++) {
-        words.add(selectWord())
-      }
-      // Should have variety in word selection
-      expect(words.size).toBeGreaterThan(1)
     })
   })
 

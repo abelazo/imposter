@@ -9,17 +9,6 @@ export interface GameState {
   currentPlayerIndex: number
 }
 
-const WORDS = [
-  'apple', 'banana', 'orange', 'grape', 'mango',
-  'pizza', 'burger', 'pasta', 'sushi', 'taco',
-  'dog', 'cat', 'elephant', 'lion', 'penguin',
-  'guitar', 'piano', 'drums', 'violin', 'trumpet',
-  'beach', 'mountain', 'forest', 'desert', 'ocean',
-  'doctor', 'teacher', 'chef', 'pilot', 'artist',
-  'car', 'bicycle', 'airplane', 'train', 'boat',
-  'soccer', 'basketball', 'tennis', 'golf', 'swimming',
-]
-
 export function assignRoles(participantCount: number, impostorCount: number): PlayerRole[] {
   // Create array of indices and shuffle to randomize impostor positions
   const indices = Array.from({ length: participantCount }, (_, i) => i)
@@ -32,11 +21,6 @@ export function assignRoles(participantCount: number, impostorCount: number): Pl
     playerNumber: i + 1,
     isImpostor: impostorIndices.has(i),
   }))
-}
-
-export function selectWord(): string {
-  const randomIndex = Math.floor(Math.random() * WORDS.length)
-  return WORDS[randomIndex]
 }
 
 function shuffleArray<T>(array: T[]): void {
