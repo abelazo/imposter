@@ -1,14 +1,21 @@
 'use client'
 
 import { useState } from 'react'
+import { ImpostorCounter } from './ImpostorCounter'
+
+interface GameConfig {
+  participantCount: number
+  impostorCount: number
+}
 
 interface ParticipantSetupProps {
-  onStart: (participantCount: number) => void
+  onStart: (config: GameConfig) => void
 }
 
 export function ParticipantSetup({ onStart }: ParticipantSetupProps) {
   const [participants, setParticipants] = useState<number[]>([])
   const [nextId, setNextId] = useState(1)
+  const [impostorCount, setImpostorCount] = useState(1)
 
   const addParticipant = () => {
     if (participants.length < 10) {
@@ -21,8 +28,16 @@ export function ParticipantSetup({ onStart }: ParticipantSetupProps) {
     setParticipants(participants.filter((p) => p !== id))
   }
 
+  const handleStart = () => {
+    onStart({
+      participantCount: participants.length,
+      impostorCount,
+    })
+  }
+
   const canStart = participants.length >= 2
   const canAdd = participants.length < 10
+  const showImpostorCounter = participants.length >= 2
 
   return (
     <div className="flex flex-col gap-4">
@@ -54,8 +69,16 @@ export function ParticipantSetup({ onStart }: ParticipantSetupProps) {
         ))}
       </ul>
 
+      {showImpostorCounter && (
+        <ImpostorCounter
+          participantCount={participants.length}
+          value={impostorCount}
+          onChange={setImpostorCount}
+        />
+      )}
+
       <button
-        onClick={() => onStart(participants.length)}
+        onClick={handleStart}
         disabled={!canStart}
         className="rounded-full bg-green-600 px-6 py-3 text-lg font-semibold text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
       >

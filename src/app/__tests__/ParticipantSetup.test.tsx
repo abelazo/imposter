@@ -81,7 +81,7 @@ describe('ParticipantSetup', () => {
       expect(screen.getByRole('button', { name: /start/i })).toBeEnabled()
     })
 
-    it('calls onStart with participant count when clicked', async () => {
+    it('calls onStart with participant count and impostor count when clicked', async () => {
       const user = userEvent.setup()
       const onStart = vi.fn()
       render(<ParticipantSetup onStart={onStart} />)
@@ -90,7 +90,41 @@ describe('ParticipantSetup', () => {
       await user.click(screen.getByRole('button', { name: /add participant/i }))
       await user.click(screen.getByRole('button', { name: /start/i }))
 
-      expect(onStart).toHaveBeenCalledWith(2)
+      expect(onStart).toHaveBeenCalledWith({ participantCount: 2, impostorCount: 1 })
+    })
+  })
+
+  describe('impostor counter integration', () => {
+    it('shows impostor counter when there are 2+ participants', async () => {
+      const user = userEvent.setup()
+      render(<ParticipantSetup onStart={vi.fn()} />)
+
+      await user.click(screen.getByRole('button', { name: /add participant/i }))
+      await user.click(screen.getByRole('button', { name: /add participant/i }))
+
+      expect(screen.getByText(/impostors/i)).toBeInTheDocument()
+    })
+
+    it('does not show impostor counter with less than 2 participants', () => {
+      render(<ParticipantSetup onStart={vi.fn()} />)
+      expect(screen.queryByText(/impostors/i)).not.toBeInTheDocument()
+    })
+
+    it('passes correct impostor count to onStart', async () => {
+      const user = userEvent.setup()
+      const onStart = vi.fn()
+      render(<ParticipantSetup onStart={onStart} />)
+
+      // Add 6 participants (max impostors = 2)
+      for (let i = 0; i < 6; i++) {
+        await user.click(screen.getByRole('button', { name: /add participant/i }))
+      }
+
+      // Increase impostor count to 2
+      await user.click(screen.getByRole('button', { name: /increase/i }))
+      await user.click(screen.getByRole('button', { name: /start/i }))
+
+      expect(onStart).toHaveBeenCalledWith({ participantCount: 6, impostorCount: 2 })
     })
   })
 })

@@ -3,9 +3,9 @@
 import { ParticipantSetup } from './components/ParticipantSetup'
 
 export default function Home() {
-  const handleStart = (participantCount: number) => {
-    console.log(`Starting game with ${participantCount} participants`)
-    // TODO: Navigate to game screen (US-002+)
+  const handleStart = (config: { participantCount: number; impostorCount: number }) => {
+    console.log(`Starting game with ${config.participantCount} participants and ${config.impostorCount} impostors`)
+    // TODO: Navigate to game screen
   }
 
   return (
