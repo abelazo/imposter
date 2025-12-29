@@ -41,3 +41,17 @@ topics:
       - "metro"
       - "camión"
       - "patinete"
+  nature:
+    title: "Naturaleza"
+    words:
+      - "árbol"
+      - "flor"
+      - "montaña"
+      - "río"
+      - "lago"
+      - "bosque"
+      - "playa"
+      - "cielo"
+      - "nube"
+      - "sol"
+      - "estrella"
