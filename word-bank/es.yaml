@@ -1,6 +1,6 @@
 topics:
   daily-life:
-    title: "Objetos de la vida diaria"
+    title: "🏠 Objetos de la vida diaria"
     words:
       - "mesa"
       - "silla"
@@ -14,7 +14,7 @@ topics:
       - "cortina"
       - "llaves"
   food:
-    title: "Comida y bebida"
+    title: "🍕 Comida y bebida"
     words:
       - "manzana"
       - "pan"
@@ -28,7 +28,7 @@ topics:
       - "jugo"
       - "café"
   transportation:
-    title: "Medios de transporte"
+    title: "🚂 Medios de transporte"
     words:
       - "coche"
       - "bicicleta"
