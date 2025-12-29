@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { ImpostorCounter } from './ImpostorCounter'
 import { TopicSelector } from './TopicSelector'
-import { getTopics } from '../lib/wordBank'
+import type { WordBank } from '../lib/wordBank'
 
 interface GameConfig {
   participantCount: number
@@ -13,18 +13,19 @@ interface GameConfig {
 
 interface ParticipantSetupProps {
   onStart: (config: GameConfig) => void
+  wordBank: WordBank
 }
 
 function getMaxImpostors(participantCount: number): number {
   return Math.max(1, Math.floor(participantCount / 2) - 1)
 }
 
-export function ParticipantSetup({ onStart }: ParticipantSetupProps) {
+export function ParticipantSetup({ onStart, wordBank }: ParticipantSetupProps) {
   const [participants, setParticipants] = useState<number[]>([])
   const [nextId, setNextId] = useState(1)
   const [impostorCount, setImpostorCount] = useState(1)
 
-  const topics = getTopics()
+  const topics = wordBank.topics
   const [topicId, setTopicId] = useState(topics[0]?.id ?? '')
 
   // Compute clamped impostor count based on current participants

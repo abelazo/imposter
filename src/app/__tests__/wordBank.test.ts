@@ -1,76 +1,110 @@
-import { describe, it, expect } from 'vitest'
-import { getTopics, getWordsForTopic, selectWordFromTopic } from '../lib/wordBank'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+
+const mockYamlContent = `
+topics:
+  daily-life:
+    title: "Objetos de la vida diaria"
+    words:
+      - "mesa"
+      - "silla"
+      - "puerta"
+  food:
+    title: "Comida y bebida"
+    words:
+      - "manzana"
+      - "pan"
+  transportation:
+    title: "Medios de transporte"
+    words:
+      - "coche"
+      - "bicicleta"
+`
 
 describe('wordBank', () => {
-  describe('getTopics', () => {
-    it('returns list of available topics', () => {
-      const topics = getTopics()
-      expect(topics.length).toBeGreaterThan(0)
+  beforeEach(() => {
+    vi.stubGlobal('fetch', vi.fn(() =>
+      Promise.resolve({
+        text: () => Promise.resolve(mockYamlContent),
+      })
+    ))
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    vi.resetModules()
+  })
+
+  describe('loadWordBank', () => {
+    it('fetches and parses word bank from URL', async () => {
+      const { loadWordBank } = await import('../lib/wordBank')
+      const wordBank = await loadWordBank()
+      expect(fetch).toHaveBeenCalled()
+      expect(wordBank.topics).toBeDefined()
     })
 
-    it('each topic has id and title', () => {
-      const topics = getTopics()
-      topics.forEach((topic) => {
-        expect(topic.id).toBeTruthy()
-        expect(topic.title).toBeTruthy()
+    it('returns topics with id and title', async () => {
+      const { loadWordBank } = await import('../lib/wordBank')
+      const wordBank = await loadWordBank()
+      expect(wordBank.topics).toContainEqual({
+        id: 'daily-life',
+        title: 'Objetos de la vida diaria',
       })
     })
 
-    it('includes expected topics', () => {
-      const topics = getTopics()
-      const topicIds = topics.map((t) => t.id)
-      expect(topicIds).toContain('daily-life')
-      expect(topicIds).toContain('food')
-      expect(topicIds).toContain('transportation')
+    it('returns all topics from yaml', async () => {
+      const { loadWordBank } = await import('../lib/wordBank')
+      const wordBank = await loadWordBank()
+      expect(wordBank.topics).toHaveLength(3)
+      const ids = wordBank.topics.map((t) => t.id)
+      expect(ids).toContain('daily-life')
+      expect(ids).toContain('food')
+      expect(ids).toContain('transportation')
     })
   })
 
   describe('getWordsForTopic', () => {
-    it('returns words for a valid topic', () => {
-      const words = getWordsForTopic('food')
-      expect(words.length).toBeGreaterThan(0)
+    it('returns words for a valid topic', async () => {
+      const { loadWordBank } = await import('../lib/wordBank')
+      const wordBank = await loadWordBank()
+      const words = wordBank.getWordsForTopic('daily-life')
+      expect(words).toContain('mesa')
+      expect(words).toContain('silla')
     })
 
-    it('returns expected words for food topic', () => {
-      const words = getWordsForTopic('food')
-      expect(words).toContain('manzana')
-      expect(words).toContain('pan')
-    })
-
-    it('returns empty array for invalid topic', () => {
-      const words = getWordsForTopic('invalid-topic')
+    it('returns empty array for invalid topic', async () => {
+      const { loadWordBank } = await import('../lib/wordBank')
+      const wordBank = await loadWordBank()
+      const words = wordBank.getWordsForTopic('nonexistent')
       expect(words).toEqual([])
     })
   })
 
   describe('selectWordFromTopic', () => {
-    it('returns a word from the specified topic', () => {
-      const word = selectWordFromTopic('food')
-      const allFoodWords = getWordsForTopic('food')
-      expect(allFoodWords).toContain(word)
+    it('returns a word from the specified topic', async () => {
+      const { loadWordBank } = await import('../lib/wordBank')
+      const wordBank = await loadWordBank()
+      const word = wordBank.selectWordFromTopic('food')
+      expect(['manzana', 'pan']).toContain(word)
     })
 
-    it('returns different words on multiple calls', () => {
-      const words = new Set<string>()
-      for (let i = 0; i < 20; i++) {
-        words.add(selectWordFromTopic('food'))
-      }
-      expect(words.size).toBeGreaterThan(1)
+    it('returns empty string for invalid topic', async () => {
+      const { loadWordBank } = await import('../lib/wordBank')
+      const wordBank = await loadWordBank()
+      const word = wordBank.selectWordFromTopic('nonexistent')
+      expect(word).toBe('')
     })
 
-    it('avoids returning the same word as lastWord', () => {
-      const lastWord = 'manzana'
-      // Run multiple times to verify it avoids lastWord
+    it('avoids returning lastWord when possible', async () => {
+      const { loadWordBank } = await import('../lib/wordBank')
+      const wordBank = await loadWordBank()
+      // With only 2 words in food topic, avoiding 'manzana' should give 'pan'
+      const results = new Set<string>()
       for (let i = 0; i < 10; i++) {
-        const word = selectWordFromTopic('food', lastWord)
-        expect(word).not.toBe(lastWord)
+        const word = wordBank.selectWordFromTopic('food', 'manzana')
+        results.add(word)
       }
-    })
-
-    it('returns a word even if lastWord is provided and topic has multiple words', () => {
-      const word = selectWordFromTopic('food', 'pan')
-      expect(word).toBeTruthy()
-      expect(word).not.toBe('pan')
+      expect(results.has('pan')).toBe(true)
+      expect(results.size).toBe(1)
     })
   })
 })

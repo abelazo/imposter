@@ -2,18 +2,20 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ParticipantSetup } from '../components/ParticipantSetup'
-import { getTopics } from '../lib/wordBank'
+import { createMockWordBank, mockTopics } from './helpers/mockWordBank'
 
 describe('ParticipantSetup', () => {
+  const mockWordBank = createMockWordBank()
+
   describe('adding participants', () => {
     it('shows add participant button', () => {
-      render(<ParticipantSetup onStart={vi.fn()} />)
+      render(<ParticipantSetup onStart={vi.fn()} wordBank={mockWordBank} />)
       expect(screen.getByRole('button', { name: /add participant/i })).toBeInTheDocument()
     })
 
     it('adds a participant when clicking add button', async () => {
       const user = userEvent.setup()
-      render(<ParticipantSetup onStart={vi.fn()} />)
+      render(<ParticipantSetup onStart={vi.fn()} wordBank={mockWordBank} />)
 
       await user.click(screen.getByRole('button', { name: /add participant/i }))
 
@@ -22,7 +24,7 @@ describe('ParticipantSetup', () => {
 
     it('shows participant count', async () => {
       const user = userEvent.setup()
-      render(<ParticipantSetup onStart={vi.fn()} />)
+      render(<ParticipantSetup onStart={vi.fn()} wordBank={mockWordBank} />)
 
       await user.click(screen.getByRole('button', { name: /add participant/i }))
       await user.click(screen.getByRole('button', { name: /add participant/i }))
@@ -32,7 +34,7 @@ describe('ParticipantSetup', () => {
 
     it('limits maximum participants to 10', async () => {
       const user = userEvent.setup()
-      render(<ParticipantSetup onStart={vi.fn()} />)
+      render(<ParticipantSetup onStart={vi.fn()} wordBank={mockWordBank} />)
 
       // Add 10 participants
       for (let i = 0; i < 10; i++) {
@@ -47,7 +49,7 @@ describe('ParticipantSetup', () => {
   describe('removing participants', () => {
     it('allows removing a participant', async () => {
       const user = userEvent.setup()
-      render(<ParticipantSetup onStart={vi.fn()} />)
+      render(<ParticipantSetup onStart={vi.fn()} wordBank={mockWordBank} />)
 
       await user.click(screen.getByRole('button', { name: /add participant/i }))
       expect(screen.getByText('Player 1')).toBeInTheDocument()
@@ -59,13 +61,13 @@ describe('ParticipantSetup', () => {
 
   describe('start button', () => {
     it('disables start button with no participants', () => {
-      render(<ParticipantSetup onStart={vi.fn()} />)
+      render(<ParticipantSetup onStart={vi.fn()} wordBank={mockWordBank} />)
       expect(screen.getByRole('button', { name: /start/i })).toBeDisabled()
     })
 
     it('disables start button with only 1 participant', async () => {
       const user = userEvent.setup()
-      render(<ParticipantSetup onStart={vi.fn()} />)
+      render(<ParticipantSetup onStart={vi.fn()} wordBank={mockWordBank} />)
 
       await user.click(screen.getByRole('button', { name: /add participant/i }))
 
@@ -74,7 +76,7 @@ describe('ParticipantSetup', () => {
 
     it('disables start button with only 2 participants', async () => {
       const user = userEvent.setup()
-      render(<ParticipantSetup onStart={vi.fn()} />)
+      render(<ParticipantSetup onStart={vi.fn()} wordBank={mockWordBank} />)
 
       await user.click(screen.getByRole('button', { name: /add participant/i }))
       await user.click(screen.getByRole('button', { name: /add participant/i }))
@@ -84,7 +86,7 @@ describe('ParticipantSetup', () => {
 
     it('enables start button with 3 or more participants', async () => {
       const user = userEvent.setup()
-      render(<ParticipantSetup onStart={vi.fn()} />)
+      render(<ParticipantSetup onStart={vi.fn()} wordBank={mockWordBank} />)
 
       await user.click(screen.getByRole('button', { name: /add participant/i }))
       await user.click(screen.getByRole('button', { name: /add participant/i }))
@@ -96,7 +98,7 @@ describe('ParticipantSetup', () => {
     it('calls onStart with participant count, impostor count, and topic when clicked', async () => {
       const user = userEvent.setup()
       const onStart = vi.fn()
-      render(<ParticipantSetup onStart={onStart} />)
+      render(<ParticipantSetup onStart={onStart} wordBank={mockWordBank} />)
 
       await user.click(screen.getByRole('button', { name: /add participant/i }))
       await user.click(screen.getByRole('button', { name: /add participant/i }))
@@ -113,14 +115,14 @@ describe('ParticipantSetup', () => {
 
   describe('topic selection', () => {
     it('shows topic selector', () => {
-      render(<ParticipantSetup onStart={vi.fn()} />)
+      render(<ParticipantSetup onStart={vi.fn()} wordBank={mockWordBank} />)
       expect(screen.getByLabelText(/topic/i)).toBeInTheDocument()
     })
 
     it('allows changing topic', async () => {
       const user = userEvent.setup()
       const onStart = vi.fn()
-      render(<ParticipantSetup onStart={onStart} />)
+      render(<ParticipantSetup onStart={onStart} wordBank={mockWordBank} />)
 
       // Add participants to enable start
       for (let i = 0; i < 3; i++) {
@@ -137,10 +139,9 @@ describe('ParticipantSetup', () => {
     })
 
     it('displays all available topics from word bank', () => {
-      render(<ParticipantSetup onStart={vi.fn()} />)
-      const topics = getTopics()
+      render(<ParticipantSetup onStart={vi.fn()} wordBank={mockWordBank} />)
 
-      topics.forEach((topic) => {
+      mockTopics.forEach((topic) => {
         expect(screen.getByRole('option', { name: topic.title })).toBeInTheDocument()
       })
     })
@@ -149,7 +150,7 @@ describe('ParticipantSetup', () => {
   describe('impostor counter integration', () => {
     it('shows impostor counter when there are 2+ participants', async () => {
       const user = userEvent.setup()
-      render(<ParticipantSetup onStart={vi.fn()} />)
+      render(<ParticipantSetup onStart={vi.fn()} wordBank={mockWordBank} />)
 
       await user.click(screen.getByRole('button', { name: /add participant/i }))
       await user.click(screen.getByRole('button', { name: /add participant/i }))
@@ -158,14 +159,14 @@ describe('ParticipantSetup', () => {
     })
 
     it('does not show impostor counter with less than 2 participants', () => {
-      render(<ParticipantSetup onStart={vi.fn()} />)
+      render(<ParticipantSetup onStart={vi.fn()} wordBank={mockWordBank} />)
       expect(screen.queryByText(/impostors/i)).not.toBeInTheDocument()
     })
 
     it('passes correct impostor count to onStart', async () => {
       const user = userEvent.setup()
       const onStart = vi.fn()
-      render(<ParticipantSetup onStart={onStart} />)
+      render(<ParticipantSetup onStart={onStart} wordBank={mockWordBank} />)
 
       // Add 6 participants (max impostors = 2)
       for (let i = 0; i < 6; i++) {
@@ -184,7 +185,7 @@ describe('ParticipantSetup', () => {
     it('auto-adjusts impostor count when removing participants makes it invalid', async () => {
       const user = userEvent.setup()
       const onStart = vi.fn()
-      render(<ParticipantSetup onStart={onStart} />)
+      render(<ParticipantSetup onStart={onStart} wordBank={mockWordBank} />)
 
       // Add 6 participants (max impostors = 2)
       for (let i = 0; i < 6; i++) {
@@ -208,7 +209,7 @@ describe('ParticipantSetup', () => {
 
     it('disables start button when removing participants below minimum', async () => {
       const user = userEvent.setup()
-      render(<ParticipantSetup onStart={vi.fn()} />)
+      render(<ParticipantSetup onStart={vi.fn()} wordBank={mockWordBank} />)
 
       // Add 3 participants
       for (let i = 0; i < 3; i++) {
@@ -225,7 +226,7 @@ describe('ParticipantSetup', () => {
 
     it('clamps impostor count to valid range when participants change', async () => {
       const user = userEvent.setup()
-      render(<ParticipantSetup onStart={vi.fn()} />)
+      render(<ParticipantSetup onStart={vi.fn()} wordBank={mockWordBank} />)
 
       // Add 6 participants and set impostors to 2
       for (let i = 0; i < 6; i++) {
