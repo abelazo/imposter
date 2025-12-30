@@ -18,7 +18,7 @@ interface ParticipantSetupProps {
 }
 
 function getMaxImpostors(participantCount: number): number {
-  return Math.max(1, Math.floor(participantCount / 2) - 1)
+  return Math.max(1, Math.floor(participantCount / 2))
 }
 
 function getInitialState(topics: { id: string }[]) {

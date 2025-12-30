@@ -191,23 +191,24 @@ describe('ParticipantSetup', () => {
       const onStart = vi.fn()
       render(<ParticipantSetup onStart={onStart} wordBank={mockWordBank} />)
 
-      // Add 6 participants (max impostors = 2)
+      // Add 6 participants (max impostors = 3)
       for (let i = 0; i < 6; i++) {
         await user.click(screen.getByRole('button', { name: /add participant/i }))
       }
 
-      // Set impostors to 2
+      // Set impostors to 3
+      await user.click(screen.getByRole('button', { name: /increase/i }))
       await user.click(screen.getByRole('button', { name: /increase/i }))
 
-      // Remove 2 participants (now 4 participants, max impostors = 1)
+      // Remove 2 participants (now 4 participants, max impostors = 2)
       await user.click(screen.getByRole('button', { name: /remove player 6/i }))
       await user.click(screen.getByRole('button', { name: /remove player 5/i }))
 
-      // Start game - impostor count should be auto-adjusted to 1
+      // Start game - impostor count should be auto-adjusted to 2
       await user.click(screen.getByRole('button', { name: /start/i }))
 
       expect(onStart).toHaveBeenCalledWith(
-        expect.objectContaining({ participantCount: 4, impostorCount: 1 })
+        expect.objectContaining({ participantCount: 4, impostorCount: 2 })
       )
     })
 

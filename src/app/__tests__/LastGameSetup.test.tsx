@@ -136,7 +136,7 @@ describe('Last Game Setup Persistence', () => {
       // Save with high impostor count
       saveGameSettings({
         participantCount: 4,
-        impostorCount: 5, // Invalid for 4 participants (max is 1)
+        impostorCount: 5, // Invalid for 4 participants (max is 2)
         topicId: 'daily-life',
       })
 
@@ -147,7 +147,7 @@ describe('Last Game Setup Persistence', () => {
       await userEvent.click(screen.getByRole('button', { name: /start/i }))
 
       expect(onStart).toHaveBeenCalledWith(
-        expect.objectContaining({ impostorCount: 1 })
+        expect.objectContaining({ impostorCount: 2 })
       )
     })
 
