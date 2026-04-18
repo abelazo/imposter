@@ -2,13 +2,13 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-> **Keep this file up to date.** Update CLAUDE.md whenever the project structure, architecture, tech stack, commands, or workflow changes (e.g. adding a new dependency, reorganizing directories, changing CI steps, or introducing a new pattern).
+> **Keep this file up to date.** Update CLAUDE.md whenever the project structure, architecture, tech stack, or key patterns change.
 
 ## Project Overview
 
-"Impostor Game" is a browser-based party game assistant. Players take turns being shown their role (civilian or impostor) along with a secret word on a shared device, without the others seeing. The game then plays out verbally among participants.
+"Impostor Game" is a browser-based party game assistant. Players take turns being shown their role (civilian or impostor) along with a secret word on a shared device, without the others seeing.
 
-Key behaviours:
+Key behaviours that shape the code:
 
 - Word bank loaded remotely from a YAML file (GitHub raw URL) and cached in memory
 - Last-used word is excluded from the next random draw to avoid immediate repetition
@@ -30,10 +30,10 @@ bun run test:run  # Run tests once
 
 This is a Next.js 16 web application using:
 
-- **App Router** (`src/app/`) - File-based routing with React Server Components by default
-- **TypeScript** - Strict type checking enabled
-- **Tailwind CSS v4** - Utility-first styling via `@tailwindcss/postcss`
-- **Vitest** - Testing framework with React Testing Library
+- **App Router** (`src/app/`) — File-based routing with React Server Components by default
+- **TypeScript** — Strict type checking enabled
+- **Tailwind CSS v4** — Utility-first styling via `@tailwindcss/postcss`
+- **Vitest** — Testing framework with React Testing Library
 
 ### Project Structure
 
@@ -78,7 +78,7 @@ topics:
 - Use `'use client'` directive for client-side interactivity (onClick, useState, etc.)
 - Server Components (default) can directly fetch data without useEffect
 - Import alias `@/*` maps to `src/*`
-- The whole app is a single client-side page; there is currently no server-side logic or API routes
+- The whole app is a single client-side page; there is no server-side logic or API routes
 
 ## TDD Workflow
 
@@ -90,59 +90,6 @@ Follow Test-Driven Development:
 
 Test files go in `__tests__/` directories with `.test.tsx` extension.
 
-## Pre-commit Hooks
+## CI/CD & Commits
 
-Pre-commit hooks are driven by `.pre-commit-config.yaml`. Active hooks:
-
-- **trailing-whitespace**, **end-of-file-fixer**, **mixed-line-ending**, **check-case-conflict**, **check-merge-conflict** — general file hygiene
-- **prettier** — code formatting (runs on staged files)
-- **commitizen** — enforces Conventional Commits on commit messages
-
-To install hooks locally:
-
-```bash
-pre-commit install
-```
-
-## CI/CD
-
-One workflow drives the pipeline:
-
-**`release.yml`** — triggered on push to `main`:
-
-1. Lint (`bun run lint`)
-2. Test (`bun run test:run`)
-3. Build
-4. Semantic release (creates a GitHub release from conventional commits)
-5. Deploy to GitHub Pages
-
-> **Why a single workflow?** GitHub Actions does not trigger downstream workflows when `GITHUB_TOKEN` is used to create events (e.g. a release). Keeping deployment in the same workflow avoids this restriction without requiring a Personal Access Token.
-
-### Third-party action versions
-
-Always use the **latest** major version. Do **not** downgrade. **Never assume a version — always verify against the action's GitHub releases page before adding or updating an action.**
-
-Current pinned versions:
-
-| Action                          | Version |
-| ------------------------------- | ------- |
-| `actions/checkout`              | `v6`    |
-| `actions/setup-node`            | `v6`    |
-| `oven-sh/setup-bun`             | `v2`    |
-| `actions/configure-pages`       | `v6`    |
-| `actions/upload-pages-artifact` | `v5`    |
-| `actions/deploy-pages`          | `v5`    |
-
-> When adding a new action, always verify the latest version at `https://github.com/<owner>/<action>/releases/latest` before writing it into a workflow. Never use a version from memory.
-
-## Commits
-
-- Follow Conventional Commits specification for commit messages
-- Use imperative mood (e.g., "Add feature", "Fix bug")
-- Prefix with type (feat, fix, docs, style, refactor, test, chore)
-- When linked to a User Story, scope is recommended (e.g., `feat(US-001): Add login`)
-
-## Documentation
-
-- README.md for setup and usage instructions
-- README.md shall always be updated with any change in the development lifecycle or architecture
+See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for commit conventions, the full release pipeline, and pre-commit hook setup.

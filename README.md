@@ -16,7 +16,7 @@ A browser-based party game assistant for groups of 3–10 players. One player (o
 - Civilians know the word; impostors do not.
 - The impostor wins by avoiding detection until the vote.
 - Civilians win by correctly identifying all impostors.
-- Minimum 3 players; maximum 10 players.
+- Minimum 3 players; maximum 20 players.
 - Impostor count is capped at half the total player count.
 
 ### App features
