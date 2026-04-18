@@ -44,7 +44,7 @@ describe("Home", () => {
     render(<Home />);
     await waitFor(() => {
       expect(
-        screen.getByRole("button", { name: /add participant/i }),
+        screen.getByRole("button", { name: /increase participants/i }),
       ).toBeInTheDocument();
     });
   });

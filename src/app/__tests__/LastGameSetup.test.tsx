@@ -70,7 +70,7 @@ describe("Last Game Setup Persistence", () => {
       // Add 5 participants
       for (let i = 0; i < 5; i++) {
         await user.click(
-          screen.getByRole("button", { name: /add participant/i }),
+          screen.getByRole("button", { name: /increase participants/i }),
         );
       }
 
@@ -102,10 +102,6 @@ describe("Last Game Setup Persistence", () => {
 
       // Should show 4 participants loaded
       expect(screen.getByText(/4 participants/i)).toBeInTheDocument();
-      expect(screen.getByText("Player 1")).toBeInTheDocument();
-      expect(screen.getByText("Player 2")).toBeInTheDocument();
-      expect(screen.getByText("Player 3")).toBeInTheDocument();
-      expect(screen.getByText("Player 4")).toBeInTheDocument();
     });
 
     it("loads saved topic on mount", async () => {
@@ -205,7 +201,7 @@ describe("Last Game Setup Persistence", () => {
 
       for (let i = 0; i < 5; i++) {
         await user.click(
-          screen.getByRole("button", { name: /add participant/i }),
+          screen.getByRole("button", { name: /increase participants/i }),
         );
       }
       await user.selectOptions(screen.getByRole("combobox"), "food");

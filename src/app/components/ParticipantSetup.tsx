@@ -25,23 +25,17 @@ function getMaxImpostors(participantCount: number): number {
 function getInitialState(topics: { id: string }[]) {
   const saved = loadGameSettings();
   if (saved) {
-    const clampedCount = Math.min(Math.max(0, saved.participantCount), 20);
-    const ids =
-      clampedCount > 0
-        ? Array.from({ length: clampedCount }, (_, i) => i + 1)
-        : [];
+    const participantCount = Math.min(Math.max(0, saved.participantCount), 20);
     const topicExists = topics.some((t) => t.id === saved.topicId);
     return {
-      participants: ids,
-      nextId: clampedCount + 1,
+      participantCount,
       impostorCount: saved.impostorCount,
       topicId: topicExists ? saved.topicId : (topics[0]?.id ?? ""),
       randomImpostorCount: saved.randomImpostorCount ?? false,
     };
   }
   return {
-    participants: [] as number[],
-    nextId: 1,
+    participantCount: 0,
     impostorCount: 1,
     topicId: topics[0]?.id ?? "",
     randomImpostorCount: false,
@@ -52,10 +46,9 @@ export function ParticipantSetup({ onStart, wordBank }: ParticipantSetupProps) {
   const topics = wordBank.topics;
   const [initialState] = useState(() => getInitialState(topics));
 
-  const [participants, setParticipants] = useState<number[]>(
-    initialState.participants,
+  const [participantCount, setParticipantCount] = useState(
+    initialState.participantCount,
   );
-  const [nextId, setNextId] = useState(initialState.nextId);
   const [impostorCount, setImpostorCount] = useState(
     initialState.impostorCount,
   );
@@ -64,34 +57,32 @@ export function ParticipantSetup({ onStart, wordBank }: ParticipantSetupProps) {
     initialState.randomImpostorCount,
   );
 
-  // Compute clamped impostor count based on current participants
-  const maxImpostors = getMaxImpostors(participants.length);
+  const maxImpostors = getMaxImpostors(participantCount);
   const clampedImpostorCount = Math.min(
     Math.max(1, impostorCount),
     maxImpostors,
   );
 
-  const addParticipant = () => {
-    if (participants.length < 20) {
-      setParticipants([...participants, nextId]);
-      setNextId(nextId + 1);
+  const handleIncrease = () => {
+    if (participantCount < 20) {
+      setParticipantCount(participantCount + 1);
     }
   };
 
-  const removeParticipant = (id: number) => {
-    const newParticipants = participants.filter((p) => p !== id);
-    setParticipants(newParticipants);
-
-    // Clamp impostor count if it exceeds the new maximum
-    const newMaxImpostors = getMaxImpostors(newParticipants.length);
-    if (impostorCount > newMaxImpostors) {
-      setImpostorCount(newMaxImpostors);
+  const handleDecrease = () => {
+    if (participantCount > 0) {
+      const newCount = participantCount - 1;
+      setParticipantCount(newCount);
+      const newMaxImpostors = getMaxImpostors(newCount);
+      if (impostorCount > newMaxImpostors) {
+        setImpostorCount(newMaxImpostors);
+      }
     }
   };
 
   const handleStart = () => {
     const config = {
-      participantCount: participants.length,
+      participantCount,
       impostorCount: clampedImpostorCount,
       topicId,
       randomImpostorCount,
@@ -100,49 +91,46 @@ export function ParticipantSetup({ onStart, wordBank }: ParticipantSetupProps) {
     onStart(config);
   };
 
-  const canStart = participants.length >= 3;
-  const canAdd = participants.length < 20;
-  const showImpostorCounter = participants.length >= 2;
+  const canStart = participantCount >= 3;
+  const showImpostorCounter = participantCount >= 2;
 
   return (
     <div className="flex flex-col gap-4">
       <TopicSelector topics={topics} value={topicId} onChange={setTopicId} />
 
       <div className="flex items-center justify-between">
-        <span className="text-lg">
-          {participants.length} participant
-          {participants.length !== 1 ? "s" : ""}
-        </span>
-        <button
-          onClick={addParticipant}
-          disabled={!canAdd}
-          className="rounded-full bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        <label id="participants-label" className="text-lg">
+          😇 {participantCount} participant{participantCount !== 1 ? "s" : ""}
+        </label>
+        <div
+          className="flex items-center gap-3"
+          aria-labelledby="participants-label"
         >
-          Add Participant
-        </button>
-      </div>
-
-      <ul className="flex flex-col gap-2">
-        {participants.map((id, index) => (
-          <li
-            key={id}
-            className="flex items-center justify-between rounded-lg bg-gray-100 px-4 py-2 dark:bg-gray-800"
+          <button
+            onClick={handleDecrease}
+            disabled={participantCount === 0}
+            aria-label="Decrease participants"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-200 text-xl font-bold hover:bg-zinc-300 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-zinc-700 dark:hover:bg-zinc-600"
           >
-            <span>Player {index + 1}</span>
-            <button
-              onClick={() => removeParticipant(id)}
-              aria-label={`Remove Player ${index + 1}`}
-              className="text-red-600 hover:text-red-700"
-            >
-              Remove
-            </button>
-          </li>
-        ))}
-      </ul>
+            -
+          </button>
+          <span className="w-8 text-center text-xl font-semibold">
+            {participantCount}
+          </span>
+          <button
+            onClick={handleIncrease}
+            disabled={participantCount === 20}
+            aria-label="Increase participants"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-200 text-xl font-bold hover:bg-zinc-300 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-zinc-700 dark:hover:bg-zinc-600"
+          >
+            +
+          </button>
+        </div>
+      </div>
 
       {showImpostorCounter && (
         <ImpostorCounter
-          participantCount={participants.length}
+          participantCount={participantCount}
           value={clampedImpostorCount}
           onChange={setImpostorCount}
           randomImpostorCount={randomImpostorCount}

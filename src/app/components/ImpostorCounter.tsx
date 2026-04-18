@@ -37,7 +37,7 @@ export function ImpostorCounter({
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
         <label id="impostor-label" className="text-lg">
-          Impostors
+          😈 Impostors
         </label>
         <div
           className="flex items-center gap-3"

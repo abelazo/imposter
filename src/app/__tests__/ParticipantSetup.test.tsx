@@ -11,23 +11,43 @@ describe("ParticipantSetup", () => {
     localStorage.clear();
   });
 
-  describe("adding participants", () => {
-    it("shows add participant button", () => {
+  describe("participant counter", () => {
+    it("shows participant counter with + and - buttons", () => {
       render(<ParticipantSetup onStart={vi.fn()} wordBank={mockWordBank} />);
       expect(
-        screen.getByRole("button", { name: /add participant/i }),
+        screen.getByRole("button", { name: /increase participants/i }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /decrease participants/i }),
       ).toBeInTheDocument();
     });
 
-    it("adds a participant when clicking add button", async () => {
+    it("increases participant count when clicking +", async () => {
       const user = userEvent.setup();
       render(<ParticipantSetup onStart={vi.fn()} wordBank={mockWordBank} />);
 
       await user.click(
-        screen.getByRole("button", { name: /add participant/i }),
+        screen.getByRole("button", { name: /increase participants/i }),
       );
 
-      expect(screen.getByText("Player 1")).toBeInTheDocument();
+      expect(screen.getByText(/1 participant$/i)).toBeInTheDocument();
+    });
+
+    it("decreases participant count when clicking -", async () => {
+      const user = userEvent.setup();
+      render(<ParticipantSetup onStart={vi.fn()} wordBank={mockWordBank} />);
+
+      await user.click(
+        screen.getByRole("button", { name: /increase participants/i }),
+      );
+      await user.click(
+        screen.getByRole("button", { name: /increase participants/i }),
+      );
+      await user.click(
+        screen.getByRole("button", { name: /decrease participants/i }),
+      );
+
+      expect(screen.getByText(/1 participant$/i)).toBeInTheDocument();
     });
 
     it("shows participant count", async () => {
@@ -35,47 +55,35 @@ describe("ParticipantSetup", () => {
       render(<ParticipantSetup onStart={vi.fn()} wordBank={mockWordBank} />);
 
       await user.click(
-        screen.getByRole("button", { name: /add participant/i }),
+        screen.getByRole("button", { name: /increase participants/i }),
       );
       await user.click(
-        screen.getByRole("button", { name: /add participant/i }),
+        screen.getByRole("button", { name: /increase participants/i }),
       );
 
       expect(screen.getByText(/2 participants/i)).toBeInTheDocument();
+    });
+
+    it("disables - button at 0 participants", () => {
+      render(<ParticipantSetup onStart={vi.fn()} wordBank={mockWordBank} />);
+      expect(
+        screen.getByRole("button", { name: /decrease participants/i }),
+      ).toBeDisabled();
     });
 
     it("limits maximum participants to 20", async () => {
       const user = userEvent.setup();
       render(<ParticipantSetup onStart={vi.fn()} wordBank={mockWordBank} />);
 
-      // Add 20 participants
       for (let i = 0; i < 20; i++) {
         await user.click(
-          screen.getByRole("button", { name: /add participant/i }),
+          screen.getByRole("button", { name: /increase participants/i }),
         );
       }
 
-      // Add button should be disabled or hidden
       expect(
-        screen.queryByRole("button", { name: /add participant/i }),
+        screen.getByRole("button", { name: /increase participants/i }),
       ).toBeDisabled();
-    });
-  });
-
-  describe("removing participants", () => {
-    it("allows removing a participant", async () => {
-      const user = userEvent.setup();
-      render(<ParticipantSetup onStart={vi.fn()} wordBank={mockWordBank} />);
-
-      await user.click(
-        screen.getByRole("button", { name: /add participant/i }),
-      );
-      expect(screen.getByText("Player 1")).toBeInTheDocument();
-
-      await user.click(
-        screen.getByRole("button", { name: /remove player 1/i }),
-      );
-      expect(screen.queryByText("Player 1")).not.toBeInTheDocument();
     });
   });
 
@@ -90,7 +98,7 @@ describe("ParticipantSetup", () => {
       render(<ParticipantSetup onStart={vi.fn()} wordBank={mockWordBank} />);
 
       await user.click(
-        screen.getByRole("button", { name: /add participant/i }),
+        screen.getByRole("button", { name: /increase participants/i }),
       );
 
       expect(screen.getByRole("button", { name: /start/i })).toBeDisabled();
@@ -100,12 +108,11 @@ describe("ParticipantSetup", () => {
       const user = userEvent.setup();
       render(<ParticipantSetup onStart={vi.fn()} wordBank={mockWordBank} />);
 
-      await user.click(
-        screen.getByRole("button", { name: /add participant/i }),
-      );
-      await user.click(
-        screen.getByRole("button", { name: /add participant/i }),
-      );
+      for (let i = 0; i < 2; i++) {
+        await user.click(
+          screen.getByRole("button", { name: /increase participants/i }),
+        );
+      }
 
       expect(screen.getByRole("button", { name: /start/i })).toBeDisabled();
     });
@@ -114,15 +121,11 @@ describe("ParticipantSetup", () => {
       const user = userEvent.setup();
       render(<ParticipantSetup onStart={vi.fn()} wordBank={mockWordBank} />);
 
-      await user.click(
-        screen.getByRole("button", { name: /add participant/i }),
-      );
-      await user.click(
-        screen.getByRole("button", { name: /add participant/i }),
-      );
-      await user.click(
-        screen.getByRole("button", { name: /add participant/i }),
-      );
+      for (let i = 0; i < 3; i++) {
+        await user.click(
+          screen.getByRole("button", { name: /increase participants/i }),
+        );
+      }
 
       expect(screen.getByRole("button", { name: /start/i })).toBeEnabled();
     });
@@ -132,15 +135,11 @@ describe("ParticipantSetup", () => {
       const onStart = vi.fn();
       render(<ParticipantSetup onStart={onStart} wordBank={mockWordBank} />);
 
-      await user.click(
-        screen.getByRole("button", { name: /add participant/i }),
-      );
-      await user.click(
-        screen.getByRole("button", { name: /add participant/i }),
-      );
-      await user.click(
-        screen.getByRole("button", { name: /add participant/i }),
-      );
+      for (let i = 0; i < 3; i++) {
+        await user.click(
+          screen.getByRole("button", { name: /increase participants/i }),
+        );
+      }
       await user.click(screen.getByRole("button", { name: /start/i }));
 
       expect(onStart).toHaveBeenCalledWith({
@@ -160,7 +159,7 @@ describe("ParticipantSetup", () => {
 
       for (let i = 0; i < 3; i++) {
         await user.click(
-          screen.getByRole("button", { name: /add participant/i }),
+          screen.getByRole("button", { name: /increase participants/i }),
         );
       }
       await user.click(screen.getByRole("button", { name: /start/i }));
@@ -177,7 +176,7 @@ describe("ParticipantSetup", () => {
 
       for (let i = 0; i < 4; i++) {
         await user.click(
-          screen.getByRole("button", { name: /add participant/i }),
+          screen.getByRole("button", { name: /increase participants/i }),
         );
       }
 
@@ -201,14 +200,12 @@ describe("ParticipantSetup", () => {
       const onStart = vi.fn();
       render(<ParticipantSetup onStart={onStart} wordBank={mockWordBank} />);
 
-      // Add participants to enable start
       for (let i = 0; i < 3; i++) {
         await user.click(
-          screen.getByRole("button", { name: /add participant/i }),
+          screen.getByRole("button", { name: /increase participants/i }),
         );
       }
 
-      // Change topic
       await user.selectOptions(screen.getByRole("combobox"), "transportation");
       await user.click(screen.getByRole("button", { name: /start/i }));
 
@@ -233,12 +230,11 @@ describe("ParticipantSetup", () => {
       const user = userEvent.setup();
       render(<ParticipantSetup onStart={vi.fn()} wordBank={mockWordBank} />);
 
-      await user.click(
-        screen.getByRole("button", { name: /add participant/i }),
-      );
-      await user.click(
-        screen.getByRole("button", { name: /add participant/i }),
-      );
+      for (let i = 0; i < 2; i++) {
+        await user.click(
+          screen.getByRole("button", { name: /increase participants/i }),
+        );
+      }
 
       expect(screen.getByText(/impostors/i)).toBeInTheDocument();
     });
@@ -253,15 +249,15 @@ describe("ParticipantSetup", () => {
       const onStart = vi.fn();
       render(<ParticipantSetup onStart={onStart} wordBank={mockWordBank} />);
 
-      // Add 6 participants (max impostors = 2)
       for (let i = 0; i < 6; i++) {
         await user.click(
-          screen.getByRole("button", { name: /add participant/i }),
+          screen.getByRole("button", { name: /increase participants/i }),
         );
       }
 
-      // Increase impostor count to 2
-      await user.click(screen.getByRole("button", { name: /increase/i }));
+      await user.click(
+        screen.getByRole("button", { name: /increase impostors/i }),
+      );
       await user.click(screen.getByRole("button", { name: /start/i }));
 
       expect(onStart).toHaveBeenCalledWith(
@@ -269,31 +265,33 @@ describe("ParticipantSetup", () => {
       );
     });
 
-    it("auto-adjusts impostor count when removing participants makes it invalid", async () => {
+    it("auto-adjusts impostor count when decreasing participants makes it invalid", async () => {
       const user = userEvent.setup();
       const onStart = vi.fn();
       render(<ParticipantSetup onStart={onStart} wordBank={mockWordBank} />);
 
-      // Add 6 participants (max impostors = 3)
       for (let i = 0; i < 6; i++) {
         await user.click(
-          screen.getByRole("button", { name: /add participant/i }),
+          screen.getByRole("button", { name: /increase participants/i }),
         );
       }
 
-      // Set impostors to 3
-      await user.click(screen.getByRole("button", { name: /increase/i }));
-      await user.click(screen.getByRole("button", { name: /increase/i }));
-
-      // Remove 2 participants (now 4 participants, max impostors = 2)
+      // Set impostors to 3 (max for 6 participants)
       await user.click(
-        screen.getByRole("button", { name: /remove player 6/i }),
+        screen.getByRole("button", { name: /increase impostors/i }),
       );
       await user.click(
-        screen.getByRole("button", { name: /remove player 5/i }),
+        screen.getByRole("button", { name: /increase impostors/i }),
       );
 
-      // Start game - impostor count should be auto-adjusted to 2
+      // Decrease to 4 participants (max impostors = 2)
+      await user.click(
+        screen.getByRole("button", { name: /decrease participants/i }),
+      );
+      await user.click(
+        screen.getByRole("button", { name: /decrease participants/i }),
+      );
+
       await user.click(screen.getByRole("button", { name: /start/i }));
 
       expect(onStart).toHaveBeenCalledWith(
@@ -301,22 +299,20 @@ describe("ParticipantSetup", () => {
       );
     });
 
-    it("disables start button when removing participants below minimum", async () => {
+    it("disables start button when decreasing participants below minimum", async () => {
       const user = userEvent.setup();
       render(<ParticipantSetup onStart={vi.fn()} wordBank={mockWordBank} />);
 
-      // Add 3 participants
       for (let i = 0; i < 3; i++) {
         await user.click(
-          screen.getByRole("button", { name: /add participant/i }),
+          screen.getByRole("button", { name: /increase participants/i }),
         );
       }
 
       expect(screen.getByRole("button", { name: /start/i })).toBeEnabled();
 
-      // Remove 1 participant (now 2 participants, below minimum)
       await user.click(
-        screen.getByRole("button", { name: /remove player 3/i }),
+        screen.getByRole("button", { name: /decrease participants/i }),
       );
 
       expect(screen.getByRole("button", { name: /start/i })).toBeDisabled();
@@ -326,29 +322,24 @@ describe("ParticipantSetup", () => {
       const user = userEvent.setup();
       render(<ParticipantSetup onStart={vi.fn()} wordBank={mockWordBank} />);
 
-      // Add 6 participants and set impostors to 2
       for (let i = 0; i < 6; i++) {
         await user.click(
-          screen.getByRole("button", { name: /add participant/i }),
+          screen.getByRole("button", { name: /increase participants/i }),
         );
       }
-      await user.click(screen.getByRole("button", { name: /increase/i }));
-
-      // Remove participants until only 2 remain
+      // Set impostors to 2
       await user.click(
-        screen.getByRole("button", { name: /remove player 6/i }),
-      );
-      await user.click(
-        screen.getByRole("button", { name: /remove player 5/i }),
-      );
-      await user.click(
-        screen.getByRole("button", { name: /remove player 4/i }),
-      );
-      await user.click(
-        screen.getByRole("button", { name: /remove player 3/i }),
+        screen.getByRole("button", { name: /increase impostors/i }),
       );
 
-      // With 2 participants, max is 1, so counter should show 1
+      // Decrease to 2 participants (max impostors = 1)
+      for (let i = 0; i < 4; i++) {
+        await user.click(
+          screen.getByRole("button", { name: /decrease participants/i }),
+        );
+      }
+
+      // Counter should show 1 (clamped)
       expect(screen.getByText("1")).toBeInTheDocument();
     });
   });
