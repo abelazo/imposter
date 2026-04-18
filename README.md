@@ -1,38 +1,32 @@
-## Imposter Game Web App
+## Impostor Game Web App
 
-<General description>
+A browser-based party game assistant for groups of 3–10 players. One player (or more) is secretly the **impostor** — they don't know the secret word that everyone else shares. Through open conversation, the group tries to identify the impostor before they blend in.
 
-## Development
+### How it works
 
-First, run the development server:
+1. **Setup** — Choose a topic, add 3–10 players, and set how many impostors there will be (or let the app randomize it).
+2. **Role reveal** — Players take turns holding the shared device. Each player taps "Show the word" to privately see their role:
+   - **Civilians** see the secret word.
+   - **Impostors** see "IMPOSTOR" instead of the word — they must bluff their way through.
+3. **Discussion** — Everyone gives clues or comments about the word without saying it outright. Impostors must fake familiarity with a word they don't know.
+4. **Vote** — The group votes on who they think the impostor is.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+### Rules
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- Civilians know the word; impostors do not.
+- The impostor wins by avoiding detection until the vote.
+- Civilians win by correctly identifying all impostors.
+- Minimum 3 players; maximum 10 players.
+- Impostor count is capped at half the total player count.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### App features
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Remote word bank loaded from a YAML file and cached in memory
+- Multiple topics to choose from
+- Optional randomized impostor count for extra unpredictability
+- Last-used word is excluded from the next draw to avoid repetition
+- Game settings (player count, impostor count, topic) saved in `localStorage` and restored on the next session
 
-## Learn More
+## Contributing
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for development setup and guidelines.
